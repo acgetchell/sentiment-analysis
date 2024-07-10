@@ -1,0 +1,17 @@
+[package]
+name = "sentiment-analysis"
+authors = ["Adam Getchell <acgetchell@ucdavis.edu>"]
+description = "A sentiment analysis API that demonstrates using LLM inferencing and KV stores together"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+spin-sdk = "3.0.1"
+
+[workspace]

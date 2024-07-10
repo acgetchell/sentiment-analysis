@@ -1,0 +1,20 @@
+spin_manifest_version = 2
+
+[application]
+name = "sentiment-analysis"
+version = "0.1.0"
+authors = ["Adam Getchell <acgetchell@ucdavis.edu>"]
+description = "A sentiment analysis API that demonstrates using LLM inferencing and KV stores together"
+
+[[trigger.http]]
+route = "/api/..."
+component = "sentiment-analysis"
+
+[component.sentiment-analysis]
+source = "target/wasm32-wasi/release/sentiment_analysis.wasm"
+ai_models = ["llama2-chat"]
+key_value_stores = ["default"]
+allowed_outbound_hosts = []
+[component.sentiment-analysis.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
