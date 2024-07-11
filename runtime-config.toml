@@ -1,0 +1,4 @@
+[llm_compute]
+type = "remote_http"
+url = "${LLM_URL}"
+auth_token = "${LLM_AUTH_TOKEN}"

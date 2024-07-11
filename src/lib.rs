@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use anyhow::Result;
 use spin_sdk::{
-    http::{IntoResponse, Json, Params, Request, Response, Router},
+    http::{IntoResponse, Params, Request, Response, Router},
     http_component,
     key_value::Store,
     llm::{infer_with_options, InferencingModel::Llama2Chat},
@@ -63,21 +63,12 @@ fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<impl Into
     let kv = Store::open_default()?;
 
     // If the sentiment of the sentence is already in the KV store, return it
-    // if kv.exists(sentence).unwrap_or(false) {
-    //     println!("Found sentence in KV store returning cached sentiment.");
-    //     let sentiment = kv.get(sentence)?;
-    //     let resp = SentimentAnalysisResponse {
-    //         sentiment: String::from_utf8(sentiment.unwrap())?,
-    //     };
-    //     let resp_str = serde_json::to_string(&resp)?;
     if let Ok(sentiment) = kv.get(sentence) {
         println!("Found sentence in KV store returning cached sentiment.");
         let resp = SentimentAnalysisResponse {
             sentiment: String::from_utf8(sentiment.unwrap())?,
         };
 
-        // let resp_str = serde_json::to_string(&resp)?;
-        // return Ok(Response::new(200, resp_str));
         return send_ok_response(200, resp);
     }
     println!("Sentence not found in KV store.");
@@ -118,16 +109,8 @@ fn perform_sentiment_analysis(req: Request, _params: Params) -> Result<impl Into
             .unwrap_or_default(),
     };
 
-    // let resp_str = serde_json::to_string(&resp)?;
-    // Ok(Response::new(200, resp_str))
     send_ok_response(200, resp)
 }
-
-// fn send_ok_response(code: u16, resp: SentimentAnalysisResponse) -> Result<Response> {
-//     Ok(Response::builder()
-//         .status(code)
-//         .body(Some(serde_json::to_string(&resp)?.into()))?)
-// }
 
 fn send_ok_response(code: u16, resp: SentimentAnalysisResponse) -> Result<Response> {
     let resp_str = serde_json::to_string(&resp)?;
@@ -135,12 +118,9 @@ fn send_ok_response(code: u16, resp: SentimentAnalysisResponse) -> Result<Respon
 }
 
 fn body_json_to_map(req: &Request) -> Result<SentimentAnalysisRequest> {
-    let body = match req.body().as_ref() {
-        Some(bytes) => bytes,
-        None => anyhow::bail!("Request body is empty"),
-    };
+    let body = String::from_utf8(req.body().as_ref().to_vec())?;
 
-    Ok(serde_json::from_slice(&body)?)
+    Ok(SentimentAnalysisRequest { sentence: body })
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -186,12 +166,23 @@ impl FromStr for Sentiment {
     }
 }
 
-// #[http_component]
-// fn handle_sentiment_analysis(req: Request) -> anyhow::Result<impl IntoResponse> {
-//     println!("Handling request to {:?}", req.header("spin-full-url"));
-//     Ok(Response::builder()
-//         .status(200)
-//         .header("content-type", "text/plain")
-//         .body("Hello, Fermyon")
-//         .build())
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deserialize_sentiment_analysis_request() {
+        let json = r#"{"sentence":"I am so happy today"}"#;
+        let request: SentimentAnalysisRequest = serde_json::from_str(json).unwrap();
+        assert_eq!(request.sentence, "I am so happy today");
+    }
+
+    #[test]
+    fn serialize_sentiment_analysis_response() {
+        let response = SentimentAnalysisResponse {
+            sentiment: "positive".to_string(),
+        };
+        let json = serde_json::to_string(&response).unwrap();
+        assert_eq!(json, r#"{"sentiment":"positive"}"#);
+    }
+}
