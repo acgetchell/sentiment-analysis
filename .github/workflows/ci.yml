@@ -26,6 +26,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+          target: wasm32-wasi
 
       - name: Install Spin
         uses: fermyon/actions/spin/setup@v1

@@ -1,6 +1,6 @@
 # Sentiment Analysis
 
-This follows the [tutorial] on [Fermyon].
+[This] follows the [tutorial] on [Fermyon].
 
 ## Stack
 
@@ -12,6 +12,7 @@ This follows the [tutorial] on [Fermyon].
 - [Fermyon Key Value Store]
 - [Llama 2]
 
+[This]:https://sentiment-analysis-cxaky3uo.fermyon.app/
 [tutorial]:https://developer.fermyon.com/spin/v2/ai-sentiment-analysis-api-tutorial
 [Fermyon]:https://developer.fermyon.com
 [Rust]:https://www.rust-lang.org
